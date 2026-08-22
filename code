@@ -1,26 +1,22 @@
 #include <iostream>
 #include <string>
-#include <cctype>
-#include <limits>
 
-// Function to encrypt or decrypt text using Caesar Cipher logic
-std::string caesarCipher(const std::string& text, int shift, const std::string& mode) {
-    if (mode == "decrypt") {
-        shift = -shift;
-    }
+using namespace std;
 
-    // Ensures correct positive modulo wrapping in C++ for negative shifts
-    int netShift = (shift % 26 + 26) % 26;
-    std::string result = "";
+// Encrypts or decrypts text using Caesar Cipher logic
+string caesarCipher(string text, int shift) {
+    string result = "";
+
+    // Normalize shift within 0-25 bounds (handles negative numbers)
+    shift = (shift % 26 + 26) % 26;
 
     for (char c : text) {
-        if (std::isupper(c)) {
-            result += static_cast<char>((c - 'A' + netShift) % 26 + 'A');
-        } else if (std::islower(c)) {
-            result += static_cast<char>((c - 'a' + netShift) % 26 + 'a');
+        if (c >= 'A' && c <= 'Z') {
+            result += (c - 'A' + shift) % 26 + 'A';
+        } else if (c >= 'a' && c <= 'z') {
+            result += (c - 'a' + shift) % 26 + 'a';
         } else {
-            // Preserve spaces, numbers, and special characters
-            result += c;
+            result += c; // Keep spaces, digits, and special characters unchanged
         }
     }
 
@@ -28,72 +24,22 @@ std::string caesarCipher(const std::string& text, int shift, const std::string& 
 }
 
 int main() {
-    std::cout << "====================================\n";
-    std::cout << "   Caesar Cipher (ROT13) Program    \n";
-    std::cout << "====================================\n";
+    int choice;
+    string text;
 
-    while (true) {
-        std::cout << "\nMenu Options:\n";
-        std::cout << "1. Encrypt Text\n";
-        std::cout << "2. Decrypt Text\n";
-        std::cout << "3. Exit\n";
-        std::cout << "Select an option (1-3): ";
+    cout << "1. Encrypt\n2. Decrypt\nSelect (1 or 2): ";
+    cin >> choice;
+    cin.ignore(); // Clean up newline before reading text line
 
-        int choice;
-        if (!(std::cin >> choice)) {
-            std::cout << "Error: Invalid selection. Please enter a number (1-3).\n";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
-        }
+    cout << "Enter text: ";
+    getline(cin, text);
 
-        if (choice == 3) {
-            std::cout << "Program exited successfully. Goodbye!\n";
-            break;
-        }
+    // Shift forward by 13 for encrypt, backward by 13 for decrypt
+    int shift = (choice == 2) ? -13 : 13;
 
-        if (choice != 1 && choice != 2) {
-            std::cout << "Error: Invalid choice. Please select 1, 2, or 3.\n";
-            continue;
-        }
+    string output = caesarCipher(text, shift);
 
-        std::string mode = (choice == 1) ? "encrypt" : "decrypt";
-
-        // Clear input buffer before reading full line string
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-        std::string text;
-        std::cout << "Enter text to " << mode << ": ";
-        std::getline(std::cin, text);
-
-        if (text.empty()) {
-            std::cout << "Error: Input text cannot be empty.\n";
-            continue;
-        }
-
-        std::cout << "Enter shift value (Press Enter for default ROT13 / 13): ";
-        std::string shiftInput;
-        std::getline(std::cin, shiftInput);
-
-        int shift = 13; // Default shift
-        if (!shiftInput.empty()) {
-            try {
-                shift = std::stoi(shiftInput);
-            } catch (...) {
-                std::cout << "Invalid shift input. Defaulting to shift value 13.\n";
-                shift = 13;
-            }
-        }
-
-        std::string result = caesarCipher(text, shift, mode);
-
-        std::cout << "\n------------------------------------\n";
-        std::cout << "Operation : " << (mode == "encrypt" ? "Encrypt" : "Decrypt") << "\n";
-        std::cout << "Shift     : " << shift << "\n";
-        std::cout << "Original  : " << text << "\n";
-        std::cout << "Result    : " << result << "\n";
-        std::cout << "------------------------------------\n";
-    }
+    cout << "Result: " << output << "\n";
 
     return 0;
 }
